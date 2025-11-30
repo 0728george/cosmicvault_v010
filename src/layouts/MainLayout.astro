@@ -1,0 +1,89 @@
+---
+// src/layouts/MainLayout.astro
+import '../styles/global.css';
+export interface Props { title: string; description?: string; }
+const { title = "CosmicVault", description = "A free, eternal library of human knowledge" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} • CosmicVault</title>
+    <meta name="description" content={description} />
+    
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="https://cosmicvault.us/og-image.jpg" />
+    <meta property="og:url" content="https://cosmicvault.us" />
+    <meta property="og:type" content="website" />
+  </head>
+  
+  <body class="font-body overflow-x-hidden">
+    <div class="fixed inset-0 -z-10 bg-black">
+      <div class="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-black to-cyan-900/20"></div>
+      <div id="stars" class="absolute inset-0"></div>
+    </div>
+    
+    <header class="relative z-10 border-b border-white/10 backdrop-blur-md bg-black/50 sticky top-0">
+      <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+        <h1 class="text-3xl font-bold tracking-wider font-title bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+          COSMICVAULT
+        </h1>
+        <nav class="hidden md:flex gap-8 text-sm uppercase tracking-widest">
+          <a href="/" class="hover:text-cyan-400 transition">Library</a>
+          <a href="/about" class="hover:text-cyan-400 transition">About</a>
+          <a href="/legal" class="hover:text-cyan-400 transition">Legal</a>
+        </nav>
+      </div>
+    </header>
+
+    <slot />
+
+    <footer class="relative z-10 border-t border-white/10 backdrop-blur-md bg-black/70 mt-32 py-12">
+      <div class="max-w-5xl mx-auto px-6 text-center text-sm opacity-70">
+        <p>Created by Gheorghe Varga • Built with Grok (xAI)</p>
+        <p class="mt-2">All works are public domain (CC0) • Source code MIT • 2025–∞</p>
+      </div>
+    </footer>
+
+    <script>
+      // Tiny starfield – zero dependencies, pure mystery
+      const canvas = document.createElement('canvas');
+      canvas.style.position = 'fixed';
+      canvas.style.inset = '0';
+      canvas.style.pointerEvents = 'none';
+      document.getElementById('stars')?.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const stars = Array.from({length: 300}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2,
+        speed: Math.random() * 0.5
+      }));
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+          ctx.fillStyle = 'white';
+          ctx.globalAlpha = Math.random() > 0.5 ? 1 : 0.5;
+          ctx.fillRect(s.x, s.y, s.size, s.size);
+          s.y += s.speed;
+          if (s.y > canvas.height) s.y = 0;
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    </script>
+  </body>
+</html>
