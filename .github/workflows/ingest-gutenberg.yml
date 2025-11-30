@@ -1,30 +1,78 @@
+name: Auto-Ingest Public-Domain Books
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'   # Daily at 03:00 UTC
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Install AWS CLI (for S3-compatible R2)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          aws-region: auto  # R2 uses 'auto'
+          aws-region: auto
 
-      - name: Upload books to R2
+      - name: Create folders
         run: |
-          aws s3 cp public/books/ s3://cosmicvault-books/books/ --recursive --endpoint-url https://<your-account-id>.r2.cloudflarestorage.com
-          aws s3 cp public/books/metadata/ s3://cosmicvault-books/metadata/ --recursive --endpoint-url https://<your-account-id>.r2.cloudflarestorage.com
-          aws s3 cp public/books/covers/ s3://cosmicvault-books/covers/ --recursive --endpoint-url https://<your-account-id>.r2.cloudflarestorage.com
-        env:
-          AWS_REGION: auto
+          mkdir -p public/books public/books/metadata public/books/covers
 
-      - name: Update search index in GitHub (metadata only)
+      - name: Download first 100 books (test run)
         run: |
-          # Generate tiny index.json from metadata (no full texts)
+          curl -s https://www.gutenberg.org/robot/harvest?filetypes[]=txt | grep -o 'ebooks/[0-9]*' | head -100 | cut -d/ -f2 > ids.txt
+          while read id; do
+            echo "Downloading book $id..."
+            wget -q "https://www.gutenberg.org/ebooks/$id.txt.utf-8" -O "public/books/$id.txt" || continue
+          done < ids.txt
+
+      - name: Generate metadata & covers
+        run: |
+          python3 -c "
+import os, json
+from PIL import Image, ImageDraw, ImageFont
+os.makedirs('public/books/metadata', exist_ok=True)
+os.makedirs('public/books/covers', exist_ok=True)
+for txt in os.listdir('public/books'):
+    if not txt.endswith('.txt'): continue
+    id = txt.split('.')[0]
+    with open(f'public/books/{txt}', encoding='utf-8', errors='ignore') as f:
+        lines = f.readlines()[:200]
+    title = next((l.strip() for l in lines if l.startswith('Title:')), 'Unknown Title').replace('Title: ', '')
+    author = next((l.strip() for l in lines if l.startswith('Author:')), 'Unknown Author').replace('Author: ', '')
+    # Simple cover
+    img = Image.new('RGB', (800, 1200), (10, 10, 30))
+    d = ImageDraw.Draw(img)
+    d.text((80, 300), title[:50], fill=(200, 180, 255), font_size=50)
+    d.text((80, 500), author[:40], fill=(150, 220, 255), font_size=40)
+    img.save(f'public/books/covers/{id}.jpg')
+    # Metadata
+    with open(f'public/books/metadata/{id}.json', 'w') as mf:
+        json.dump({'id': id, 'title': title, 'author': author, 'file': f'{id}.txt', 'cover': f'{id}.jpg'}, mf)
+"
+
+      - name: Upload everything to Cloudflare R2
+        run: |
+          aws s3 sync public/books s3://cosmicvault-books/books --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          aws s3 sync public/books/metadata s3://cosmicvault-books/metadata --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          aws s3 sync public/books/covers s3://cosmicvault-books/covers --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+
+      - name: Update search index (tiny, stored in GitHub)
+        run: |
+          mkdir -p public/search
           echo '{"books": [' > public/search/index.json
-          for json in public/books/metadata/*.json; do
-            cat "$json" | sed 's/"file": ".*"/"file": "https:\/\/cosmicvault-books.r2.dev\/books\/\0"/'  # Rewrite to R2 URLs
-            echo ","
-          done | sed '$s/,$//' >> public/search/index.json
+          find public/books/metadata -name "*.json" -exec cat {} \; | sed '$!s/$/,/' >> public/search/index.json
           echo ']}' >> public/search/index.json
 
-      - name: Commit index only (books stay in R2)
+      - name: Commit search index
         run: |
+          git config user.name "CosmicVault Bot"
+          git config user.email "bot@cosmicvault.us"
           git add public/search/index.json
-          git commit -m "chore: update search index ($(ls public/books/metadata | wc -l) books in R2)" || exit 0
+          git commit -m "chore: update search index (R2)" || exit 0
           git push
