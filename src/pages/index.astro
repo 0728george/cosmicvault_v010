@@ -6,14 +6,17 @@ import MainLayout from '../layouts/MainLayout.astro';
   title="Home" 
   description="The eternal library of humanity’s wisdom — preserved at the edge of space and time"
 >
-  <main class="relative min-h-screen flex flex-col items-center justify-center px-6">
-    <div class="text-center max-w-4xl mx-auto space-y-12">
-      <!-- Title – big but not monstrous -->
-      <h1 class="text-6xl md:text-8xl font-bold tracking-tight bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text text-transparent leading-tight">
+  <main class="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
+    
+    <!-- Real drifting starfield + subtle nebula glow -->
+    <div id="stars" class="fixed inset-0 -z-10 pointer-events-none"></div>
+    <div class="fixed inset-0 -z-10 bg-gradient-to-br from-purple-900/10 via-black to-cyan-900/10"></div>
+
+    <div class="relative text-center max-w-4xl mx-auto space-y-16">
+      <h1 class="text-6xl md:text-8xl font-bold tracking-tight bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text text-transparent animate-fade-in">
         Enter the Vault
       </h1>
 
-      <!-- Poetic mission statement -->
       <p class="text-xl md:text-2xl leading-relaxed opacity-90 max-w-2xl mx-auto">
         A silent observatory of human knowledge —  
         <span class="block mt-4 text-lg opacity-80">
@@ -21,20 +24,69 @@ import MainLayout from '../layouts/MainLayout.astro';
         </span>
       </p>
 
-      <!-- Search bar – elegant and functional -->
-      <form action="/search" class="max-w-2xl mx-auto mt-12">
+      <!-- Search bar with your icon on the right -->
+      <form action="/search" class="relative max-w-2xl mx-auto mt-12 group">
         <input
           type="search"
           name="q"
           placeholder="Search wisdom across the ages..."
-          class="w-full px-8 py-5 text-lg bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl focus:outline-none focus:border-cyan-400/60 placeholder-gray-500 transition-shadow hover:shadow-cyan-500/20"
+          class="w-full px-8 py-5 pl-12 pr-16 text-lg bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl focus:outline-none focus:border-cyan-400/60 placeholder-gray-500 transition-all"
           required
         />
+        <!-- Your uploaded icon -->
+        <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 opacity-70 group-hover:opacity-100 transition">
+          <img src="/icons/search.png" alt="Search" class="w-7 h-7" />
+        </button>
       </form>
 
-      <p class="text-sm uppercase tracking-widest opacity-50 mt-20">
+      <p class="text-sm uppercase tracking-widest opacity-50 animate-fade-in-delay">
         Powered by the edge • Built to outlast the stars
       </p>
     </div>
   </main>
+
+  <style>
+    @keyframes fade-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fade-in 1.2s ease-out; }
+    .animate-fade-in-delay { animation: fade-in 1.8s ease-out; }
+  </style>
+
+  <!-- Fixed starfield that works in Astro SSR -->
+  <script is:global>
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.inset = '0';
+    canvas.style.pointerEvents = 'none';
+    document.getElementById('stars')?.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+
+    const stars = Array.from({length: 600}, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: Math.random() * 1.8,
+      speed: Math.random() * 0.4 + 0.1,
+      opacity: Math.random() * 0.8 + 0.2
+    }));
+
+    function animate() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+      ctx.fillRect(0, 0, w, h);
+      stars.forEach(s => {
+        ctx.globalAlpha = s.opacity;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(s.x, s.y, s.size, s.size);
+        s.y += s.speed;
+        if (s.y > h) s.y = 0;
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    });
+  </script>
 </MainLayout>
