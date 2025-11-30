@@ -15,17 +15,17 @@ const { title = "CosmicVault", description = "Eternal archive of human wisdom" }
 
     <link rel="icon" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
-
-    <!-- Google Fonts: modern astronomy feel -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   </head>
 
   <body class="font-sans bg-black text-gray-100 min-h-screen overflow-x-hidden">
-    <!-- Vast moving starfield -->
-    <div id="stars" class="fixed inset-0 -z-10"></div>
-    <div class="fixed inset-0 -z-10 bg-gradient-to-b from-black via-indigo-900/20 to-black"></div>
 
-    <!-- Header – subtle, Grok-inspired -->
+    <!-- Rotating Spiral Galaxy Background -->
+    <div class="fixed inset-0 -z-10">
+      <div id="galaxy" class="w-full h-full"></div>
+    </div>
+
+    <!-- Rest of your layout stays exactly the same -->
     <header class="relative z-20 border-b border-white/10 backdrop-blur-xl bg-black/60 sticky top-0">
       <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
         <a href="/" class="flex items-center gap-3 group">
@@ -43,7 +43,6 @@ const { title = "CosmicVault", description = "Eternal archive of human wisdom" }
 
     <slot />
 
-    <!-- Footer -->
     <footer class="relative z-10 border-t border-white/5 py-12 mt-32">
       <div class="max-w-4xl mx-auto text-center text-sm opacity-60">
         <p>Built by Gheorghe Varga • Powered by Grok (xAI) • 2025–∞</p>
@@ -51,39 +50,34 @@ const { title = "CosmicVault", description = "Eternal archive of human wisdom" }
       </div>
     </footer>
 
-    <!-- Lightweight starfield – 500 stars, buttery smooth -->
-    <script>
+    <!-- Spiral Galaxy Animation -->
+    <script is:global>
       const canvas = document.createElement('canvas');
-      canvas.className = 'pointer-events-none';
-      document.getElementById('stars')?.appendChild(canvas);
+      canvas.style.position = 'fixed';
+      canvas.style.inset = '0';
+      canvas.style.pointerEvents = 'none';
+      document.getElementById('galaxy')?.appendChild(canvas);
       const ctx = canvas.getContext('2d');
       let w = canvas.width = window.innerWidth;
       let h = canvas.height = window.innerHeight;
 
-      const stars = Array.from({length: 500}, () => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        size: Math.random() * 1.5,
-        speed: Math.random() * 0.3 + 0.05
-      }));
+      const arms = 5;
+      const starsPerArm = 800;
+      const rotationSpeed = 0.00008; // very slow, majestic
+      let angle = 0;
 
-      function animate() {
-        ctx.fillStyle = 'rgba(0,0,0,0.07)';
-        ctx.fillRect(0, 0, w, h);
-        stars.forEach(s => {
-          ctx.fillStyle = `hsl(50, 70%, ${70 + Math.random()*30}%)`;
-          ctx.fillRect(s.x, s.y, s.size, s.size);
-          s.y += s.speed;
-          if (s.y > h) s.y = 0;
-        });
-        requestAnimationFrame(animate);
+      const stars = [];
+      for (let arm = 0; arm < arms; arm++) {
+        const armAngle = (arm / arms) * Math.PI * 2;
+        for (let i = 0; i < starsPerArm; i++) {
+          const distance = (i / starsPerArm) ** 1.8;
+          const twist = distance * 4.5;
+          const x = Math.cos(armAngle + twist) * distance;
+          const y = Math.sin(armAngle + twist) * distance * 0.4; // flattened galaxy
+          const brightness = 1 - distance * 0.7;
+          stars.push({ x, y, brightness, armAngle });
+        }
       }
-      animate();
 
-      window.addEventListener('resize', () => {
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
-      });
-    </script>
-  </body>
-</html>
+      // Core glow
+      const core = { x: 0, y: 0, radius: 0.
