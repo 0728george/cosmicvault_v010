@@ -1,0 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-title: 'Orbitron', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
