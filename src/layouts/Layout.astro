@@ -1,5 +1,7 @@
 ---
 // src/layouts/Layout.astro
+import '../styles/global.css';  // This line is critical!
+
 export interface Props {
   title: string;
 }
@@ -12,35 +14,9 @@ const { title = "CosmicVault" } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
-    
-    <!-- This is the magic line Astro + Tailwind need
-    <link rel="stylesheet" href="/_astro/tailwind.css" />
-    
-    <style global>
-      @import "tailwindcss/base";
-      @import "tailwindcss/components";
-      @import "tailwindcss/utilities";
-    </style>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
-  <body class="min-h-screen bg-gradient-to-br from-neutral-900 via-purple-900 to-slate-900 text-white antialiased">
-    <main class="flex min-h-screen items-center justify-center px-8">
-      <div class="text-center">
-        <h1 class="mb-8 bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-7xl font-black text-transparent md:text-8xl">
-          CosmicVault
-        </h1>
-        <p class="mb-12 text-2xl opacity-90 md:text-3xl">
-          A free, open library of human knowledge — carefully built to last
-        </p>
-        <p class="mb-16 text-lg opacity-80">
-          Created by <strong>Gheorghe Varga</strong> · Built together with <strong>Grok</strong> (xAI)
-        </p>
-        <a
-          href="https://github.com/0728george/cosmicvault"
-          class="btn btn-primary btn-lg shadow-2xl"
-        >
-          Explore the Source
-        </a>
-      </div>
-    </main>
+  <body class="min-h-screen antialiased">
+    <slot />  <!-- Your page content goes here -->
   </body>
 </html>
