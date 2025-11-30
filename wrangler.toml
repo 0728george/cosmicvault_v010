@@ -1,21 +1,6 @@
-import { defineConfig } from 'astro/config';
-import cloudflare from '@astrojs/cloudflare';
-import tailwind from '@astrojs/tailwind';
+name = "cosmicvault"
+main = "./dist/server/entry.mjs"
+compatibility_date = "2024-11-30"
 
-export default defineConfig({
-  output: 'server',           // Required for Workers
-  adapter: cloudflare({
-    imageService: 'compile',  // or 'passthrough' if you handle elsewhere
-    platformProxy: {
-      enabled: true           // Enables `env` in dev (critical!)
-    }
-  }),
-  integrations: [tailwind({
-    applyBaseStyles: false
-  })],
-  vite: {
-    define: {
-      'import.meta.env.PUBLIC_SITE_URL': JSON.stringify('https://cosmicvault.us')
-    }
-  }
-});
+[vars]
+PUBLIC_SITE_URL = "https://cosmicvault.us"
