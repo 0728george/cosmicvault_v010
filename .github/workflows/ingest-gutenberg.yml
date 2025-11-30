@@ -1,0 +1,30 @@
+      - name: Install AWS CLI (for S3-compatible R2)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          aws-region: auto  # R2 uses 'auto'
+
+      - name: Upload books to R2
+        run: |
+          aws s3 cp public/books/ s3://cosmicvault-books/books/ --recursive --endpoint-url https://<your-account-id>.r2.cloudflarestorage.com
+          aws s3 cp public/books/metadata/ s3://cosmicvault-books/metadata/ --recursive --endpoint-url https://<your-account-id>.r2.cloudflarestorage.com
+          aws s3 cp public/books/covers/ s3://cosmicvault-books/covers/ --recursive --endpoint-url https://<your-account-id>.r2.cloudflarestorage.com
+        env:
+          AWS_REGION: auto
+
+      - name: Update search index in GitHub (metadata only)
+        run: |
+          # Generate tiny index.json from metadata (no full texts)
+          echo '{"books": [' > public/search/index.json
+          for json in public/books/metadata/*.json; do
+            cat "$json" | sed 's/"file": ".*"/"file": "https:\/\/cosmicvault-books.r2.dev\/books\/\0"/'  # Rewrite to R2 URLs
+            echo ","
+          done | sed '$s/,$//' >> public/search/index.json
+          echo ']}' >> public/search/index.json
+
+      - name: Commit index only (books stay in R2)
+        run: |
+          git add public/search/index.json
+          git commit -m "chore: update search index ($(ls public/books/metadata | wc -l) books in R2)" || exit 0
+          git push
