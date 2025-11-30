@@ -14,18 +14,16 @@ const { title = "CosmicVault", description = "Eternal archive of human wisdom" }
     <meta name="description" content={description} />
 
     <link rel="icon" href="/favicon.svg" />
-    <link rel="manifest" href="/manifest.json" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   </head>
 
   <body class="font-sans bg-black text-gray-100 min-h-screen overflow-x-hidden">
 
-    <!-- Rotating Spiral Galaxy Background -->
-    <div class="fixed inset-0 -z-10">
-      <div id="galaxy" class="w-full h-full"></div>
-    </div>
+    <!-- Galaxy container — MUST exist before script runs -->
+    <div id="galaxy" class="fixed inset-0 -z-10 pointer-events-none"></div>
+    <div class="fixed inset-0 -z-10 bg-gradient-to-b from-black via-indigo-900/10 to-black"></div>
 
-    <!-- Rest of your layout stays exactly the same -->
+    <!-- Your existing header, content, footer -->
     <header class="relative z-20 border-b border-white/10 backdrop-blur-xl bg-black/60 sticky top-0">
       <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
         <a href="/" class="flex items-center gap-3 group">
@@ -50,34 +48,90 @@ const { title = "CosmicVault", description = "Eternal archive of human wisdom" }
       </div>
     </footer>
 
-    <!-- Spiral Galaxy Animation -->
-    <script is:global>
-      const canvas = document.createElement('canvas');
-      canvas.style.position = 'fixed';
-      canvas.style.inset = '0';
-      canvas.style.pointerEvents = 'none';
-      document.getElementById('galaxy')?.appendChild(canvas);
-      const ctx = canvas.getContext('2d');
-      let w = canvas.width = window.innerWidth;
-      let h = canvas.height = window.innerHeight;
+    <!-- Galaxy script — now runs only after DOM is ready -->
+    <script>
+      // Wait for DOM + a tiny delay so Astro has injected #galaxy
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initGalaxy, 100);
+      });
 
-      const arms = 5;
-      const starsPerArm = 800;
-      const rotationSpeed = 0.00008; // very slow, majestic
-      let angle = 0;
+      function initGalaxy() {
+        const container = document.getElementById('galaxy');
+        if (!container) return;
 
-      const stars = [];
-      for (let arm = 0; arm < arms; arm++) {
-        const armAngle = (arm / arms) * Math.PI * 2;
-        for (let i = 0; i < starsPerArm; i++) {
-          const distance = (i / starsPerArm) ** 1.8;
-          const twist = distance * 4.5;
-          const x = Math.cos(armAngle + twist) * distance;
-          const y = Math.sin(armAngle + twist) * distance * 0.4; // flattened galaxy
-          const brightness = 1 - distance * 0.7;
-          stars.push({ x, y, brightness, armAngle });
+        const canvas = document.createElement('canvas');
+        canvas.style.position = 'absolute';
+        canvas.style.inset = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        container.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        let w = canvas.width = window.innerWidth * devicePixelRatio;
+        let h = canvas.height = window.innerHeight * devicePixelRatio;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+
+        const arms = 5;
+        const starsPerArm = 900;
+        const rotationSpeed = 0.00007;
+        let angle = 0;
+
+        const stars = [];
+        for (let a = 0; a < arms; a++) {
+          const baseAngle = (a / arms) * Math.PI * 2;
+          for (let i = 0; i < starsPerArm; i++) {
+            const dist = Math.pow(i / starsPerArm, 1.8);
+            const twist = dist * 4.8;
+            const x = Math.cos(baseAngle + twist) * dist;
+            const y = Math.sin(baseAngle + twist) * dist * 0.35;
+            stars.push({
+              x, y,
+              brightness: 1 - dist * 0.65,
+              twinkle: Math.random()
+            });
+          }
         }
-      }
 
-      // Core glow
-      const core = { x: 0, y: 0, radius: 0.
+        function draw() {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.06)';
+          ctx.fillRect(0, 0, w, h);
+
+          ctx.save();
+          ctx.translate(w / 2 / devicePixelRatio, h / 2 / devicePixelRatio);
+
+          // Core
+          const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, 80);
+          grad.addColorStop(0, 'rgba(255, 240, 180, 1)');
+          grad.addColorStop(0.4, 'rgba(255, 180, 100, 0.8)');
+          grad.addColorStop(1, 'rgba(140, 80, 255, 0)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(-80, -80, 160, 160);
+
+          // Arms
+          stars.forEach(s => {
+            const x = Math.cos(angle + s.twinkle) * s.x * Math.min(w, h) / 2.3;
+            const y = Math.sin(angle + s.twinkle) * s.y * Math.min(w, h) / 2.3;
+            ctx.globalAlpha = s.brightness * (0.6 + Math.sin(Date.now() * 0.001 + s.twinkle * 10) * 0.3);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(x - 1, y - 1, 2, 2);
+          });
+
+          ctx.restore();
+          angle += rotationSpeed;
+          requestAnimationFrame(draw);
+        }
+
+        draw();
+
+        window.addEventListener('resize', () => {
+          w = canvas.width = window.innerWidth * devicePixelRatio;
+          h = canvas.height = window.innerHeight * devicePixelRatio;
+          canvas.style.width = window.innerWidth + 'px';
+          canvas.style.height = window.innerHeight + 'px';
+        });
+      }
+    </script>
+  </body>
+</html>
