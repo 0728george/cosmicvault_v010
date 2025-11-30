@@ -3,7 +3,7 @@ name: Auto-Ingest Public-Domain Books
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 3 * * *'   # Daily at 03:00 UTC
+    - cron: '0 3 * * *'
 
 jobs:
   ingest:
@@ -12,7 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install AWS CLI (for S3-compatible R2)
+      - name: Configure AWS credentials for R2
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -20,69 +20,76 @@ jobs:
           aws-region: auto
 
       - name: Create folders
-        run: |
-          mkdir -p public/books public/books/metadata public/books/covers
+        run: mkdir -p public/books public/books/metadata public/books/covers public/search
 
-      - name: Download first 100 books (test run)
+      - name: Download first 100 Gutenberg books (test run)
         run: |
-          curl -s https://www.gutenberg.org/robot/harvest?filetypes[]=txt | grep -o 'ebooks/[0-9]*' | head -100 | cut -d/ -f2 > ids.txt
+          curl -s https://www.gutenberg.org/robot/harvest?filetypes[]=txt \
+            | grep -o 'ebooks/[0-9]*' | head -100 | cut -d/ -f2 > ids.txt
           while read id; do
             echo "Downloading book $id..."
-            wget -q "https://www.gutenberg.org/ebooks/$id.txt.utf-8" -O "public/books/$id.txt" || continue
+            wget -q "https://www.gutenberg.org/ebooks/$id.txt.utf-8" \
+                 -O "public/books/$id.txt" || continue
           done < ids.txt
 
-      - name: Install Python dependencies
-        run: |
-          echo "Pillow==10.0.0" > requirements.txt
-          pip install -r requirements.txt
+      - name: Install Pillow for cover generation
+        run: pip install --quiet pillow
 
-      - name: Generate metadata & covers
+      - name: Generate metadata + simple covers
         run: |
-          python3 -c "
-import os
-import json
-from PIL import Image, ImageDraw, ImageFont
-os.makedirs('public/books/metadata', exist_ok=True)
-os.makedirs('public/books/covers', exist_ok=True)
-for txt in os.listdir('public/books'):
-    if not txt.endswith('.txt'): continue
-    id = txt.split('.')[0]
-    with open(f'public/books/{txt}', encoding='utf-8', errors='ignore') as f:
-        lines = f.readlines()[:200]
-    title = next((l.strip() for l in lines if l.startswith('Title:')), 'Unknown Title').replace('Title: ', '')
-    author = next((l.strip() for l in lines if l.startswith('Author:')), 'Unknown Author').replace('Author: ', '')
-    # Simple cover
-    img = Image.new('RGB', (800, 1200), (10, 10, 30))
-    d = ImageDraw.Draw(img)
-    try:
-        font_title = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 50)
-        font_author = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 40)
-    except:
-        font_title = ImageFont.load_default()
-        font_author = ImageFont.load_default()
-    d.text((80, 300), title[:50], fill=(200, 180, 255), font=font_title)
-    d.text((80, 500), author[:40], fill=(150, 220, 255), font=font_author)
-    img.save(f'public/books/covers/{id}.jpg')
-    # Metadata
-    with open(f'public/books/metadata/{id}.json', 'w') as mf:
-        json.dump({'id': id, 'title': title, 'author': author, 'file': f'{id}.txt', 'cover': f'{id}.jpg'}, mf)
-"
+          python3 - <<'PY'
+          import os, json
+          from PIL import Image, ImageDraw, ImageFont
 
-      - name: Upload everything to Cloudflare R2
-        run: |
-          aws s3 sync public/books s3://cosmicvault-books/books --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
-          aws s3 sync public/books/metadata s3://cosmicvault-books/metadata --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
-          aws s3 sync public/books/covers s3://cosmicvault-books/covers --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          for txt in os.listdir("public/books"):
+              if not txt.endswith(".txt"):
+                  continue
+              book_id = txt.split(".")[0]
+              path = f"public/books/{txt}"
+              with open(path, encoding="utf-8", errors="ignore") as f:
+                  lines = [next(f).strip() for _ in range(200)]
 
-      - name: Update search index (tiny, stored in GitHub)
+              title = next((l.replace("Title: ", "") for l in lines if l.startswith("Title:")), "Unknown Title")
+              author = next((l.replace("Author: ", "") for l in lines if l.startswith("Author:")), "Unknown Author")
+
+              # Cover
+              img = Image.new("RGB", (800, 1200), (10, 10, 30))
+              draw = ImageDraw.Draw(img)
+              try:
+                  font_t = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 60)
+                  font_a = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 40)
+              except:
+                  font_t = ImageFont.load_default()
+                  font_a = ImageFont.load_default()
+              draw.text((80, 300), title[:60], fill=(200, 180, 255), font=font_t)
+              draw.text((80, 500), author[:50], fill=(150, 220, 255), font=font_a)
+              img.save(f"public/books/covers/{book_id}.jpg")
+
+              # Metadata
+              meta = {
+                  "id": book_id,
+                  "title": title,
+                  "author": author,
+                  "file": f"{book_id}.txt",
+                  "cover": f"{book_id}.jpg"
+              }
+              with open(f"public/books/metadata/{book_id}.json", "w") as mf:
+                  json.dump(meta, mf)
+          PY
+
+      - name: Upload to Cloudflare R2
         run: |
-          mkdir -p public/search
+          endpoint="https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          aws s3 sync public/books/books     s3://cosmicvault-books/books     --endpoint-url $endpoint
+          aws s3 sync public/books/metadata  s3://cosmicvault-books/metadata  --endpoint-url $endpoint
+          aws s3 sync public/books/covers    s3://cosmicvault-books/covers    --endpoint-url $endpoint
+
+      - name: Build tiny search index (stored in repo)
+        run: |
           echo '{"books": [' > public/search/index.json
-          for json_file in public/books/metadata/*.json; do
-            if [ -f "$json_file" ]; then
-              cat "$json_file"
-              echo ","
-            fi
+          for f in public/books/metadata/*.json; do
+            [ -f "$f" ] && cat "$f"
+            echo ","
           done | sed '$s/,$//' >> public/search/index.json
           echo ']}' >> public/search/index.json
 
@@ -91,5 +98,5 @@ for txt in os.listdir('public/books'):
           git config user.name "CosmicVault Bot"
           git config user.email "bot@cosmicvault.us"
           git add public/search/index.json
-          git commit -m "chore: update search index (R2)" || exit 0
+          git commit -m "chore: update search index – $(ls public/books/metadata/*.json 2>/dev/null | wc -l) books in R2" || echo "Nothing to commit"
           git push
