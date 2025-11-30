@@ -1,0 +1,21 @@
+---
+// Fetch index from GitHub, books from R2
+const response = await fetch('https://raw.githubusercontent.com/0728george/cosmicvault/main/public/search/index.json');
+const books = await response.json();
+const searchTerm = Astro.url.searchParams.get('q') || '';
+const results = books.books.filter(book => book.title.toLowerCase().includes(searchTerm.toLowerCase()));
+---
+
+<!-- Render results with R2 links -->
+<ul>
+  {results.map(book => (
+    <li>
+      <img src={`https://cosmicvault-books.r2.dev/covers/${book.cover}`} alt={book.title} />
+      <h3>{book.title}</h3>
+      <p>By {book.author}</p>
+      <a href={`https://cosmicvault-books.r2.dev/books/${book.file}`} download>Download (TXT)</a>
+      <!-- Later: PDF viewer embed -->
+      <iframe src={`/pdf-viewer?url=${encodeURIComponent(book.r2Url)}`} />  <!-- PDF.js component -->
+    </li>
+  ))}
+</ul>
