@@ -3,64 +3,38 @@ import MainLayout from '../layouts/MainLayout.astro';
 ---
 
 <MainLayout 
-  title="CosmicVault" 
-  description="The eternal library of humanity’s wisdom — freely given to all who seek it."
+  title="Home" 
+  description="The eternal library of humanity’s wisdom — preserved at the edge of space and time"
 >
-  <!-- Hero with cosmic galaxy background -->
-  <section class="relative min-h-screen flex flex-col items-center justify-start pt-32 pb-20 px-6 overflow-hidden">
-    
-    <!-- Moving galaxy + faint stars -->
-    <div class="fixed inset-0 -z-10">
-      <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/40 via-black to-purple-900/40"></div>
-      <img 
-        src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=92&fm=webp" 
-        alt="Cosmic galaxy" 
-        class="absolute inset-0 w-full h-full object-cover opacity-70 animate-slow-pan"
-      />
-      <div class="absolute inset-0 bg-black/40"></div>
-    </div>
-
-    <div class="relative text-center max-w-5xl mx-auto">
-      <!-- Main title – moved higher -->
-      <h1 class="text-7xl md:text-9xl font-title font-black tracking-tight mb-12 bg-gradient-to-r from-cyan-300 via-purple-400 to-pink-400 bg-clip-text text-transparent leading-none">
+  <main class="relative min-h-screen flex flex-col items-center justify-center px-6">
+    <div class="text-center max-w-4xl mx-auto space-y-12">
+      <!-- Title – big but not monstrous -->
+      <h1 class="text-6xl md:text-8xl font-bold tracking-tight bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text text-transparent leading-tight">
         Enter the Vault
       </h1>
 
-      <!-- New inspirational text (replaces the old one) -->
-      <p class="text-2xl md:text-4xl font-light leading-relaxed max-w-4xl mx-auto opacity-95 mb-16">
-        An eternal archive of humanity’s greatest works —  
-        <span class="block mt-4 text-xl md:text-2xl opacity-80">
-          freely preserved, freely shared, and passed forward through the ages.
+      <!-- Poetic mission statement -->
+      <p class="text-xl md:text-2xl leading-relaxed opacity-90 max-w-2xl mx-auto">
+        A silent observatory of human knowledge —  
+        <span class="block mt-4 text-lg opacity-80">
+          freely preserved across centuries, open to every mind in the universe.
         </span>
       </p>
 
-      <!-- Search bar – larger and more cosmic -->
-      <div class="max-w-3xl mx-auto">
-        <input 
+      <!-- Search bar – elegant and functional -->
+      <form action="/search" class="max-w-2xl mx-auto mt-12">
+        <input
           type="search"
-          placeholder="Seek wisdom across centuries... (titles, authors, ideas)"
-          class="w-full px-10 py-7 text-xl bg-white/10 backdrop-blur-xl border border-white/30 rounded-full focus:outline-none focus:border-cyan-400/70 placeholder-gray-400 transition-shadow shadow-2xl"
-          autofocus
+          name="q"
+          placeholder="Search wisdom across the ages..."
+          class="w-full px-8 py-5 text-lg bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl focus:outline-none focus:border-cyan-400/60 placeholder-gray-500 transition-shadow hover:shadow-cyan-500/20"
+          required
         />
-        <p class="mt-6 text-sm uppercase tracking-widest opacity-60">
-          Millions of public-domain books, papers, and ancient texts await
-        </p>
-      </div>
+      </form>
 
-      <p class="mt-20 text-sm uppercase tracking-widest opacity-50">
-        Built to outlast stars • Protected by law • Gifted to eternity
+      <p class="text-sm uppercase tracking-widest opacity-50 mt-20">
+        Powered by the edge • Built to outlast the stars
       </p>
     </div>
-  </section>
-
-  <style>
-    @keyframes slow-pan {
-      0%   { transform: translate(0, 0) scale(1.05); }
-      50%  { transform: translate(5%, 3%) scale(1.title); }
-      100% { transform: translate(0, 0) scale(1.05); }
-    }
-    .animate-slow-pan {
-      animation: slow-pan 120s linear infinite;
-    }
-  </style>
+  </main>
 </MainLayout>
