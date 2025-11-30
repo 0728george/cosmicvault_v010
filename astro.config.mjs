@@ -3,19 +3,13 @@ import cloudflare from '@astrojs/cloudflare';
 import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
-  output: 'server',           // Required for Workers
+  output: 'server',
   adapter: cloudflare({
-    imageService: 'compile',  // or 'passthrough' if you handle elsewhere
-    platformProxy: {
-      enabled: true           // Enables `env` in dev (critical!)
-    }
+    platformProxy: { enabled: true }
   }),
   integrations: [tailwind({
-    applyBaseStyles: false
-  })],
-  vite: {
-    define: {
-      'import.meta.env.PUBLIC_SITE_URL': JSON.stringify('https://cosmicvault.us')
+    config: {
+      applyBaseStyles: false  // Avoid conflicts
     }
-  }
+  })]
 });
