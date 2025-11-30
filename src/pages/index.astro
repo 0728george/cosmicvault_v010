@@ -24,20 +24,29 @@ import MainLayout from '../layouts/MainLayout.astro';
         </span>
       </p>
 
-      <!-- Search bar with your icon on the right -->
-      <form action="/search" class="relative max-w-2xl mx-auto mt-12 group">
-        <input
-          type="search"
-          name="q"
-          placeholder="Search wisdom across the ages..."
-          class="w-full px-8 py-5 pl-12 pr-16 text-lg bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl focus:outline-none focus:border-cyan-400/60 placeholder-gray-500 transition-all"
-          required
-        />
-        <!-- Your uploaded icon -->
-        <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 opacity-70 group-hover:opacity-100 transition">
-          <img src="/icons/search.png" alt="Search" class="w-7 h-7" />
-        </button>
-      </form>
+      <!-- Search bar with telescope icon -->
+<form action="/search" class="relative max-w-2xl mx-auto mt-12 group">
+  <input
+    type="search"
+    name="q"
+    placeholder="Search wisdom across the ages..."
+    class="w-full px-8 py-5 pl-12 pr-16 text-lg bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl focus:outline-none focus:border-cyan-400/60 placeholder-gray-500 transition-all"
+    required
+  />
+  <button 
+    type="submit" 
+    class="absolute right-4 top-1/2 -translate-y-1/2 opacity-70 group-hover:opacity-100 group-focus-within:opacity-100 transition"
+    aria-label="Search"
+  >
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-cyan-300 drop-shadow-glow">
+      <path d="M10 3 L3 10 L10 17 L17 10 Z" stroke-width="2"/>
+      <circle cx="15" cy="9" r="3" fill="currentColor" opacity="0.4"/>
+      <path d="M17 10 L22 5" stroke-width="1.5"/>
+      <path d="M19 12 L23 16" stroke-width="1"/>
+      <path d="M10 17 L8 21"/>
+    </svg>
+  </button>
+</form>
 
       <p class="text-sm uppercase tracking-widest opacity-50 animate-fade-in-delay">
         Powered by the edge • Built to outlast the stars
