@@ -31,10 +31,16 @@ jobs:
             wget -q "https://www.gutenberg.org/ebooks/$id.txt.utf-8" -O "public/books/$id.txt" || continue
           done < ids.txt
 
+      - name: Install Python dependencies
+        run: |
+          echo "Pillow==10.0.0" > requirements.txt
+          pip install -r requirements.txt
+
       - name: Generate metadata & covers
         run: |
           python3 -c "
-import os, json
+import os
+import json
 from PIL import Image, ImageDraw, ImageFont
 os.makedirs('public/books/metadata', exist_ok=True)
 os.makedirs('public/books/covers', exist_ok=True)
@@ -48,8 +54,14 @@ for txt in os.listdir('public/books'):
     # Simple cover
     img = Image.new('RGB', (800, 1200), (10, 10, 30))
     d = ImageDraw.Draw(img)
-    d.text((80, 300), title[:50], fill=(200, 180, 255), font_size=50)
-    d.text((80, 500), author[:40], fill=(150, 220, 255), font_size=40)
+    try:
+        font_title = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 50)
+        font_author = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 40)
+    except:
+        font_title = ImageFont.load_default()
+        font_author = ImageFont.load_default()
+    d.text((80, 300), title[:50], fill=(200, 180, 255), font=font_title)
+    d.text((80, 500), author[:40], fill=(150, 220, 255), font=font_author)
     img.save(f'public/books/covers/{id}.jpg')
     # Metadata
     with open(f'public/books/metadata/{id}.json', 'w') as mf:
@@ -66,7 +78,12 @@ for txt in os.listdir('public/books'):
         run: |
           mkdir -p public/search
           echo '{"books": [' > public/search/index.json
-          find public/books/metadata -name "*.json" -exec cat {} \; | sed '$!s/$/,/' >> public/search/index.json
+          for json_file in public/books/metadata/*.json; do
+            if [ -f "$json_file" ]; then
+              cat "$json_file"
+              echo ","
+            fi
+          done | sed '$s/,$//' >> public/search/index.json
           echo ']}' >> public/search/index.json
 
       - name: Commit search index
