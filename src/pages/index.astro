@@ -92,11 +92,11 @@ import MainLayout from '../layouts/MainLayout.astro';
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
-      voiceBtn.addEventListener('click = () => {
+      voiceBtn.addEventListener('click', () => {  // Fixed: comma after 'click'
         recognition.start();
         voiceBtn.classList.add('recording');
         voiceBtn.title = "Listening...";
-      };
+      });
 
       recognition.onresult = (event) => {
         const transcript = Array.from(event.results)
