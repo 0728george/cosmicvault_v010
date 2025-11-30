@@ -4,13 +4,13 @@ import MainLayout from '../layouts/MainLayout.astro';
 
 <MainLayout 
   title="Home" 
-  description="The eternal library of humanity’s wisdom — preserved at the edge of space and time"
+  description="Speak or type — the vault will answer"
 >
   <main class="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
     
-    <!-- Real drifting starfield + subtle nebula glow -->
-    <div id="stars" class="fixed inset-0 -z-10 pointer-events-none"></div>
-    <div class="fixed inset-0 -z-10 bg-gradient-to-br from-purple-900/10 via-black to-cyan-900/10"></div>
+    <!-- Galaxy background (already working) -->
+    <div id="galaxy" class="fixed inset-0 -z-10 pointer-events-none"></div>
+    <div class="fixed inset-0 -z-10 bg-gradient-to-b from-black via-indigo-900/10 to-black"></div>
 
     <div class="relative text-center max-w-4xl mx-auto space-y-16">
       <h1 class="text-6xl md:text-8xl font-bold tracking-tight bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text text-transparent animate-fade-in">
@@ -24,29 +24,45 @@ import MainLayout from '../layouts/MainLayout.astro';
         </span>
       </p>
 
-      <!-- Search bar with telescope icon -->
-<form action="/search" class="relative max-w-2xl mx-auto mt-12 group">
-  <input
-    type="search"
-    name="q"
-    placeholder="Search wisdom across the ages..."
-    class="w-full px-8 py-5 pl-12 pr-16 text-lg bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl focus:outline-none focus:border-cyan-400/60 placeholder-gray-500 transition-all"
-    required
-  />
-  <button 
-    type="submit" 
-    class="absolute right-4 top-1/2 -translate-y-1/2 opacity-70 group-hover:opacity-100 group-focus-within:opacity-100 transition"
-    aria-label="Search"
-  >
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-cyan-300 drop-shadow-glow">
-      <path d="M10 3 L3 10 L10 17 L17 10 Z" stroke-width="2"/>
-      <circle cx="15" cy="9" r="3" fill="currentColor" opacity="0.4"/>
-      <path d="M17 10 L22 5" stroke-width="1.5"/>
-      <path d="M19 12 L23 16" stroke-width="1"/>
-      <path d="M10 17 L8 21"/>
-    </svg>
-  </button>
-</form>
+      <!-- Voice + Text Search Bar -->
+      <form id="searchForm" action="/search" class="relative max-w-2xl mx-auto mt-12 group">
+        <input
+          id="searchInput"
+          type="search"
+          name="q"
+          placeholder="Speak or type your question..."
+          class="w-full px-8 py-5 pl-12 pr-20 text-lg bg-white/5 backdrop-blur-xl border border-white/20 rounded-2xl focus:outline-none focus:border-cyan-400/60 placeholder-gray-500 transition-all"
+          required
+          autocomplete="off"
+        />
+
+        <!-- Microphone Button (Voice Search) -->
+        <button
+          type="button"
+          id="voiceBtn"
+          class="absolute right-12 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition"
+          aria-label="Voice search"
+          title="Hold to speak"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="text-cyan-300">
+            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+          </svg>
+        </button>
+
+        <!-- Telescope Submit Button -->
+        <button 
+          type="submit"
+          class="absolute right-3 top-1/2 -translate-y-1/2 opacity-70 group-hover:opacity-100 transition"
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-cyan-300 drop-shadow-glow">
+            <path d="M10 3 L3 10 L10 17 L17 10 Z" stroke-width="2"/>
+            <circle cx="15" cy="9" r="3" fill="currentColor" opacity="0.4"/>
+            <path d="M17 10 L22 5" stroke-width="1.5"/>
+            <path d="M10 17 L8 21"/>
+          </svg>
+        </button>
+      </form>
 
       <p class="text-sm uppercase tracking-widest opacity-50 animate-fade-in-delay">
         Powered by the edge • Built to outlast the stars
@@ -58,44 +74,53 @@ import MainLayout from '../layouts/MainLayout.astro';
     @keyframes fade-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade-in { animation: fade-in 1.2s ease-out; }
     .animate-fade-in-delay { animation: fade-in 1.8s ease-out; }
+    .drop-shadow-glow { filter: drop-shadow(0 0 8px rgba(34,211,238,0.6)); }
+    #voiceBtn.recording svg { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
   </style>
 
-  <!-- Fixed starfield that works in Astro SSR -->
-  <script is:global>
-    const canvas = document.createElement('canvas');
-    canvas.style.position = 'fixed';
-    canvas.style.inset = '0';
-    canvas.style.pointerEvents = 'none';
-    document.getElementById('stars')?.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
-    let w = canvas.width = window.innerWidth;
-    let h = canvas.height = window.innerHeight;
+  <!-- Voice Search Magic -->
+  <script>
+    const voiceBtn = document.getElementById('voiceBtn');
+    const searchInput = document.getElementById('searchInput');
+    const form = document.getElementById('searchForm');
 
-    const stars = Array.from({length: 600}, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      size: Math.random() * 1.8,
-      speed: Math.random() * 0.4 + 0.1,
-      opacity: Math.random() * 0.8 + 0.2
-    }));
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
 
-    function animate() {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
-      ctx.fillRect(0, 0, w, h);
-      stars.forEach(s => {
-        ctx.globalAlpha = s.opacity;
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(s.x, s.y, s.size, s.size);
-        s.y += s.speed;
-        if (s.y > h) s.y = 0;
-      });
-      requestAnimationFrame(animate);
+      voiceBtn.addEventListener('click = () => {
+        recognition.start();
+        voiceBtn.classList.add('recording');
+        voiceBtn.title = "Listening...";
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+        searchInput.value = transcript;
+      };
+
+      recognition.onend = () => {
+        voiceBtn.classList.remove('recording');
+        voiceBtn.title = "Hold to speak";
+        if (searchInput.value.trim()) {
+          form.submit();
+        }
+      };
+
+      recognition.onerror = () => {
+        voiceBtn.classList.remove('recording');
+        voiceBtn.title = "Hold to speak";
+      };
+    } else {
+      // Hide mic if browser doesn't support it
+      voiceBtn.style.display = 'none';
     }
-    animate();
-
-    window.addEventListener('resize', () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    });
   </script>
 </MainLayout>
