@@ -1,26 +1,30 @@
 ---
-// src/pages/index.astro
-import Layout from '../layouts/Layout.astro';
+import MainLayout from '../layouts/MainLayout.astro';
 ---
 
-<Layout title="CosmicVault">
-  <main class="flex min-h-screen items-center justify-center px-8 bg-gradient-to-br from-neutral-900 via-purple-900 to-slate-900 text-white">
-    <div class="text-center max-w-4xl">
-      <h1 class="mb-8 bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-7xl font-black text-transparent md:text-8xl">
-        CosmicVault
-      </h1>
-      <p class="mb-12 text-2xl opacity-90 md:text-3xl">
-        A free, open library of human knowledge — carefully built to last
+<MainLayout title="Home" description="Search millions of public-domain books, papers, and wisdom">
+  <section class="relative min-h-screen flex items-center justify-center px-6">
+    <div class="text-center max-w-4xl mx-auto">
+      <h2 class="text-6xl md:text-8xl font-title font-black mb-8 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent leading-tight">
+        Enter the Vault
+      </h2>
+      <p class="text-xl md:text-2xl opacity-90 mb-12 leading-relaxed">
+        A free, eternal, and indestructible library of human knowledge.<br />
+        Every book here is yours forever — no login, no paywall, no expiration.
       </p>
-      <p class="mb-16 text-lg opacity-80">
-        Created by <strong>Gheorghe Varga</strong> · Built together with <strong>Grok</strong> (xAI)
+
+      <!-- Search Bar – will become functional in next step -->
+      <div class="max-w-2xl mx-auto mb-16">
+        <input 
+          type="search"
+          placeholder="Search millions of books, articles, and ancient wisdom..."
+          class="w-full px-8 py-6 text-lg bg-white/10 backdrop-blur-lg border border-white/20 rounded-full focus:outline-none focus:border-cyan-400 placeholder-gray-500 transition"
+        />
+      </div>
+
+      <p class="text-sm uppercase tracking-widest opacity-60">
+        Powered by the edge • Built to outlive civilizations
       </p>
-      <a
-        href="https://github.com/0728george/cosmicvault"
-        class="inline-block rounded-full bg-gradient-to-r from-amber-400 to-pink-500 px-8 py-4 text-xl font-bold text-white shadow-lg transition-all hover:shadow-xl"
-      >
-        Explore the Source
-      </a>
     </div>
-  </main>
-</Layout>
+  </section>
+</MainLayout>
