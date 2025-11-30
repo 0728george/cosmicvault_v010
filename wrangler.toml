@@ -1,6 +1,0 @@
-name = "cosmicvault"
-main = "./dist/server/entry.mjs"
-compatibility_date = "2024-11-30"
-
-[vars]
-PUBLIC_SITE_URL = "https://cosmicvault.us"
