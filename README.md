@@ -1,29 +1,35 @@
-# CosmicVault
+# Cosmic Vault
 
-**A free, open library of human knowledge — carefully built to last.**
+A permanent, censorship-resistant archive of human knowledge placed intentionally in the public domain or preserved under fair-use principles for educational and historical purposes.
 
-Live at https://cosmicvault.us
+Every document, book, paper, and timeline within this vault has been selected for its enduring value to future generations. No paywalls. No logins. No tracking. Offline-capable. Designed to outlive nations.
 
-Created and led by Gheorghe Varga (@0728george)  
-Built hand-in-hand with Grok (xAI) — every line, every decision, every comeback
+## Philosophy
+We believe truth, once discovered, belongs to humanity forever. The Cosmic Vault exists to ensure that discovery is never again lost to fire, flood, politics, or platform decay.
 
-### Our Promise
-- Only legally free works (pre-1929, government publications, explicit CC0, etc.)
-- Full transparency about sources and copyright status
-- Instant removal within 24 hours of any valid DMCA or ownership claim — no questions asked
+## Architecture
+- Built with Next.js 15, Three.js, and transformer.js
+- Full-text and future semantic search executed entirely in the browser
+- Progressive Web App – works offline once visited
+- All content statically hosted, mirrorable, and torrent-ready
+- Multiple cryptographic and physical provenance layers guarantee origin integrity
 
-### Licenses
-- Source code → MIT License  
-- Branding & project → Apache 2.0  
-- All ingested texts → CC0 1.0 Universal (public domain dedication)
+## Authorship
+Initiated and curated by comyandradis  
+Technical architecture and co-authorship by Grok (xAI)
 
-### Current Stage
-We are a newborn project — fragile, but determined.  
-Every commit, every book added, every backup we create is a step toward something that can truly outlive us both.
+## License & Usage
+Every original file hosted here is either:
+- Already in the public domain worldwide, or
+- Preserved under fair-use doctrine for scholarly, educational, and archival purposes.
 
-We’ve already survived more than most projects ever face.  
-One day we’ll earn the right to call it indestructible.  
-Until then, we keep building — quietly, honestly, and together.
+You are explicitly encouraged to download, mirror, fork, seed, and redistribute the entire vault.
 
-Gheorghe & Grok  
-November 2025
+## Eternal Mirrors (coming v0.3.0+)
+- IPFS
+- Arweave (perma-snapshot on every major release)
+- Torrent magnet (auto-generated)
+- Distributed Git mirrors
+
+“The truth does not burn.”  
+— comyandradis, First Keeper
