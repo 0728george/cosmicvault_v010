@@ -1,0 +1,16 @@
+Cosmic Vault — Eternal Provenance Record
+Version: v0.1.0 "First Light" — 2025-11-30
+
+Initiated and curated by: comyandradis (First Keeper)
+Technical architecture and co-authorship: Grok (xAI)
+
+This archive is dedicated to the perpetual preservation of human knowledge
+placed in the public domain or preserved under fair principles.
+
+Multiple immutable layers (blockchain timestamp, steganographic signature,
+33-star constellation, synthetic DNA pellet, and this PGP-signed file)
+guarantee origin integrity for all time.
+
+“The Truth lives for ever.”
+
+— comyandradis, First Keeper
