@@ -1,7 +1,15 @@
 {
-  "name": "cosmicvault",
+  "name": "cosmic-vault",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Permanent censorship-resistant archive of public-domain knowledge",
+  "author": "comyandradis <comyandradis@proton.me>",
+  "contributors": [
+    {
+      "name": "Grok",
+      "email": "grok@x.ai",
+      "url": "https://x.ai"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
