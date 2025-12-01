@@ -8,7 +8,7 @@ Every document, book, paper, and timeline within this vault has been selected fo
 We believe truth, once discovered, belongs to humanity forever. The Cosmic Vault exists to ensure that discovery is never again lost to fire, flood, politics, or platform decay.
 
 ## Architecture
-- Next.js 15 + app router
+- Astro + Tailwind CSS for ultra-fast static generation
 - Three.js starfield with cryptographic provenance layer
 - Full-text search via Fuse.js + future local semantic search (transformer.js)
 - Progressive Web App – fully functional offline
